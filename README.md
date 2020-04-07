@@ -24,6 +24,7 @@ The objective of the game is to explore the Castle for loot while making sure Co
 * Visual Effects Graph (7.3.1)
 * Shader Graph (7.3.1)
 * SteamVR Plugin (2.5.0) (sdk 1.8.19)
+* NavMeshComponents [Link] (https://github.com/Unity-Technologies/NavMeshComponents)
 
 ## Inputs :
 
