@@ -14,9 +14,7 @@ The objective of the game is to explore the Castle for loot while making sure Co
 
 ## Unity Plugins List :
 * Alembic (1.0.6)
-* Oculus Android (2.38.6)
 * Oculus Desktop (2.38.4)
-* Oculus XR Plugin (1.2.0)
 * OpenVR Desktop (2.0.5)
 * Polybrush (1.0.1)
 * Post Processing (2.3.0)
