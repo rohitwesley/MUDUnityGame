@@ -14,6 +14,7 @@ namespace GameLogic
         Player,
         Factory,
         Pawns,
+        PickUp
     }
     
     /// <summary>
@@ -26,12 +27,28 @@ namespace GameLogic
         public UnitType unitType = UnitType.Home;
         public GameObject unitIcon;
 
+        [Tooltip("Points")]
+        [SerializeField]
+        public int pointsValue = 10;                 // The points value of the object
+
+        [Tooltip("Score")]
+        [SerializeField]
+        public int scoreValue = 10;                 // The score value of the object
+
+        [Tooltip("Agent Current Health")]                              // The amount of health the player starts the game with.
+        public int currentHealth;
+        [Tooltip("Agent Starting Health")]                              // The amount of health the player starts the game with.
+        [SerializeField]
+        protected int startingHealth = 100;                  // The starting health the player has.
+
         /// <summary>
         /// Hide Icons on start
         /// </summary>
         private void Start()
         {
             unitIcon.SetActive(false);
+
+            Debug.Log("Agent : " + GetAgentName() + "Initialised ");
         }
 
         /// <summary>
@@ -70,8 +87,10 @@ namespace GameLogic
                     return UnitType.Player;
                 case "Factory": 
                     return UnitType.Factory;
-                case "Pawns": 
+                case "Pawns":
                     return UnitType.Pawns;
+                case "PickUp":
+                    return UnitType.PickUp;
                 default:
                     return UnitType.Floor;
             }
@@ -89,8 +108,10 @@ namespace GameLogic
                     return "Player";
                 case UnitType.Factory: 
                     return "Factory";
-                case UnitType.Pawns: 
+                case UnitType.Pawns:
                     return "Pawns";
+                case UnitType.PickUp:
+                    return "PickUp";
                 default:
                     return "Floor";
             }

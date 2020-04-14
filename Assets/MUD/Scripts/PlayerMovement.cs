@@ -23,27 +23,27 @@ public class PlayerMovement : MonoBehaviour
         // if player is not moving yet check if player has been asked to move based on WASD input from user
         if(!isMoving)
         {
-            if(Input.GetKeyDown(moveForward))
+            if(Input.GetKey(moveForward))
             {
                 LookAtDirection(new Vector3(0.0f, 0.0f, 0.0f));
-                UpdatePlayerTarget(Vector3.forward);
+                if(!isMoving)UpdatePlayerTarget(Vector3.forward);
             }
-            if(Input.GetKeyDown(moveLeft))
+            if(Input.GetKey(moveLeft))
             {
                 LookAtDirection(new Vector3(0.0f, -90.0f, 0.0f));
-                UpdatePlayerTarget(Vector3.left);
+                if (!isMoving) UpdatePlayerTarget(Vector3.left);
 
             }
-            if(Input.GetKeyDown(moveBackward))
+            if(Input.GetKey(moveBackward))
             {
                 LookAtDirection(new Vector3(0.0f, 180.0f, 0.0f));
-                UpdatePlayerTarget(Vector3.back);
+                if (!isMoving) UpdatePlayerTarget(Vector3.back);
 
             }
-            if(Input.GetKeyDown(moveRight))
+            if(Input.GetKey(moveRight))
             {
                 LookAtDirection(new Vector3(0.0f, 90.0f, 0.0f));
-                UpdatePlayerTarget(Vector3.right);
+                if (!isMoving) UpdatePlayerTarget(Vector3.right);
             }
         }
 
@@ -77,7 +77,7 @@ public class PlayerMovement : MonoBehaviour
             yield return new WaitForSeconds(0.001f);
             transform.position = Vector3.MoveTowards(transform.position, targetDirection, step);
         }
-        yield return new WaitForSeconds(1.0f);
+        //yield return new WaitForSeconds(0.001f);
         isMoving = false;
     } 
 
