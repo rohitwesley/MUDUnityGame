@@ -2,21 +2,46 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MovmentTools
+namespace MovementTools
 {
     public class SplineTool : MonoBehaviour
     {
-        // Start is called before the first frame update
-        void Start()
+        /// <summary>
+        /// SplineTool Model
+        /// </summary>
+        [Tooltip("Show Debug Gizmos")]
+        [SerializeField] public bool isDebug = true;
+
+        [HideInInspector]
+        public BezierCurve path;
+
+        [Tooltip("Spline Anchor Gizmo")]
+        [SerializeField] public Color anchorCol = Color.red;
+        [Tooltip("Spline Control Point Gizmo")]
+        [SerializeField] public Color controlCol = Color.white;
+        [Tooltip("Spline Segment Gizmo")]
+        [SerializeField] public Color segmentCol = Color.green;
+        [Tooltip("Spline Select Gizmo")]
+        [SerializeField] public Color selectedSegmentCol = Color.yellow;
+        [Tooltip("Spline Anchor Gizmo Diameter")]
+        [SerializeField] public float anchorDiameter = .1f;
+        [Tooltip("Spline Control Gizmo Diameter")]
+        [SerializeField] public float controlDiameter = .075f;
+        [Tooltip("Show Control Points Gizmos")]
+        [SerializeField] public bool displayControlPoints = true;
+
+        public void CreatePath()
         {
-        
+            path = new BezierCurve(transform.position);
         }
 
-        // Update is called once per frame
-        void Update()
+        void Reset()
         {
-        
+            CreatePath();
         }
+
+
     }
+
 
 }
