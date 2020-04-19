@@ -51,7 +51,9 @@ namespace MovementTools
 
         void OnSceneGUI()
         {
+            // Get User Input to draw Spline 
             Input();
+            // Draw Spline GUI Info in World Space
             Draw();
         }
 
