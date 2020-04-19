@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3020120682838333642}
   - component: {fileID: 3992768246375931951}
   - component: {fileID: 4767966903592380519}
+  - component: {fileID: 7083658069762671207}
   m_Layer: 0
   m_Name: Pawn
   m_TagString: Untagged
@@ -107,6 +108,29 @@ MonoBehaviour:
   textStatus: {fileID: 0}
   status: Disabled
   periodTempo: 0.1
+--- !u!114 &7083658069762671207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7083658069290066885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ece031400ba4bd74a87da141604e5ece, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xRotation: 0
+  yRotation: 1
+  zRotation: 0
+  xOscillate: 1
+  yOscillate: 1
+  zOscillate: 1
+  amplitude: 0.1
+  frequency: 0.1
+  phase: 0
+  hoverPivot: {fileID: 0}
+  isDebug: 1
 --- !u!1 &7083658069908149846
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,7 +407,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: eb947ccc76081ea4480ffc423528cc9e,
+      objectReference: {fileID: 21300000, guid: 42b495a81b21f5d4b8602ba8f4782009,
         type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c6f333677333c457388d1d5b636016b0, type: 3}
