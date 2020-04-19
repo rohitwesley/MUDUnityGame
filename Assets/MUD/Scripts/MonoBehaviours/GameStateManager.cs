@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using GameLogic;
-using TMPro;
 using UnityEngine.SceneManagement;
-using System;
 
 public enum GameState
 {
@@ -13,6 +11,7 @@ public enum GameState
     NextLevel,
     QuitLevel
 }
+
 public class GameStateManager : MonoBehaviour
 {
     [Tooltip("Player Agents In the Scene")]
@@ -20,6 +19,7 @@ public class GameStateManager : MonoBehaviour
     [SerializeField] public List<GameStateData> playerData;
     [SerializeField] public GameStateData resetPlayerData;
     [SerializeField] public GameStateData levelData;
+    [SerializeField] public ScreenManager screenManager;
 
     [SerializeField] private KeyCode _EscapeKey = KeyCode.Escape;
 
@@ -47,24 +47,32 @@ public class GameStateManager : MonoBehaviour
 
             if (playerData.timeInLevel <= 0)
             {
+                screenManager.CallLoose();
                 state = GameState.ResetLevel;
-                EndLevel(state);
+                StartCoroutine(EndLevel(state));
                 ResetLevelData();
             }
             if (playerData.checkpointInLevel >= levelData.checkpointInLevel)
             {
+                screenManager.CallWin();
                 state = GameState.NextLevel;
-                EndLevel(state);
+                StartCoroutine(EndLevel(state));
                 ResetLevelData();
             }
         }
 
         if (Input.GetKeyDown(_EscapeKey))
         {
-            state = GameState.QuitLevel;
-            EndLevel(state);
-            ResetGameData();
+            screenManager.CallMenu();
+            //QuitSequence();
         }
+    }
+
+    public void QuitSequence()
+    {
+        state = GameState.QuitLevel;
+        ResetGameData();
+        StartCoroutine(EndLevel(state));
     }
 
     public void UpdateScore(Agents currentPlayer, int score)
@@ -98,6 +106,9 @@ public class GameStateManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Reset Game Specific Data
+    /// </summary>
     public void ResetGameData()
     {
         foreach (GameStateData playerData in playerData)
@@ -108,6 +119,9 @@ public class GameStateManager : MonoBehaviour
         ResetLevelData();
     }
 
+    /// <summary>
+    /// Reset Level Specific Data
+    /// </summary>
     public void ResetLevelData()
     {
         foreach (GameStateData playerData in playerData)
@@ -120,15 +134,18 @@ public class GameStateManager : MonoBehaviour
         }
     }
 
-    void EndLevel(GameState setState)
+    /// <summary>
+    /// Test for end case
+    /// </summary>
+    /// <param name="setState"></param>
+    public IEnumerator EndLevel(GameState setState)
     {
-        
+        yield return new WaitForSeconds(2.0f);
         if (setState == GameState.ResetLevel)
         {
             // Reload the level that is currently loaded.
             string sceneName = SceneManager.GetActiveScene().name;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            //StartCoroutine(LoadSceneAndSetActive(sceneName));
         }
         else if (setState == GameState.NextLevel)
         {
@@ -145,7 +162,12 @@ public class GameStateManager : MonoBehaviour
             Quit();
         }
     }
-
+   
+    /// <summary>
+    /// TODO Load Scene in background with loading bar
+    /// </summary>
+    /// <param name="sceneName"></param>
+    /// <returns></returns>
     public IEnumerator LoadSceneAndSetActive(string sceneName)
     {
         // Allow the given scene to load over several frames and add it to the already loaded scenes (just the Persistent scene at this point).
@@ -158,7 +180,10 @@ public class GameStateManager : MonoBehaviour
         SceneManager.SetActiveScene(newlyLoadedScene);
     }
 
-    public void Quit()
+    /// <summary>
+    /// Quit application
+    /// </summary>
+    private void Quit()
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
@@ -167,6 +192,11 @@ public class GameStateManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Game Stae Helper functions
+    /// </summary>
+    /// <param name="gameStateName"></param>
+    /// <returns></returns>
     public static GameState GetGameStateFromString(string gameStateName)
     {
         switch (gameStateName)
