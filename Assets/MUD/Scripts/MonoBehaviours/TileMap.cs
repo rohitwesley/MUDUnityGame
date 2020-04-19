@@ -40,7 +40,7 @@ public class TileMap : MonoBehaviour
     /// <summary>
     /// Draw TileMap Debuger 
     /// </summary>
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         // Draw Base Axis (Base wall tiles)
         Gizmos.color = Color.red;

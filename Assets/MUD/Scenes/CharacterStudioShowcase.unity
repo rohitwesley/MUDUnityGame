@@ -228,12 +228,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 638742423}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 930728524}
-  m_Father: {fileID: 1868323985}
+  m_Father: {fileID: 1804437575}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &651155648
@@ -317,6 +317,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: M_Excavator
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: dbb338466d7e3454d8805c68c786fd38,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dbb338466d7e3454d8805c68c786fd38, type: 3}
@@ -598,6 +603,37 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dc39eb5b9fad8a343a3a5c15cada2f94, type: 3}
+--- !u!1 &1804437574
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1804437575}
+  m_Layer: 0
+  m_Name: SplineObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1804437575
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1804437574}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 638742425}
+  m_Father: {fileID: 1868323985}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1868323984
 GameObject:
   m_ObjectHideFlags: 0
@@ -627,7 +663,7 @@ Transform:
   m_LocalPosition: {x: -0.407, y: 1.889, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 638742425}
+  - {fileID: 1804437575}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -646,16 +682,25 @@ MonoBehaviour:
   isDebug: 1
   path:
     points:
-    - {x: -1.6148491, y: 1.7059798, z: 0.47265625}
-    - {x: -0.22591472, y: 0.93628085, z: -0.19433594}
-    - {x: 1.9104593, y: 0.73310876, z: 1.2285025}
-    - {x: 1.9343126, y: 1.1112194, z: 0.7840352}
-    - {x: 1.9723613, y: 1.7143579, z: 0.07505083}
-    - {x: 0.03781128, y: 3.2730532, z: -2.350744}
-    - {x: -0.33849669, y: 3.58995, z: -0.5468092}
-    - {x: -0.71480465, y: 3.906847, z: 1.2571256}
-    - {x: -1.0509953, y: 5.414502, z: 5.4921427}
-    - {x: 2.2844188, y: 4.6327076, z: 2.5046399}
+    - {x: 0.5729215, y: 1.1748047, z: -1.6622058}
+    - {x: -0.035886705, y: 1.0323925, z: -1.8910142}
+    - {x: 1.4350413, y: 2.2304688, z: 0.6763657}
+    - {x: -0.6020012, y: 2.4433594, z: -0.07014759}
+    - {x: -1.6098877, y: 2.5486932, z: -0.4395069}
+    - {x: 0.19098893, y: 1.1338212, z: 2.6732063}
+    - {x: 0.19503394, y: 0.77371645, z: 1.0322266}
+    - {x: 0.2025896, y: 0.101083994, z: -2.0329275}
+    - {x: 0.94940186, y: 0.66593623, z: 2.6343882}
+    - {x: 1.0825596, y: 1.3789062, z: 2.1649911}
+    - {x: 1.185383, y: 1.9294554, z: 1.8025267}
+    - {x: -2.7272706, y: 1.3562092, z: 0.3772117}
+    - {x: -1.9106987, y: 0.99902344, z: 1.3471781}
+    - {x: -0.20280093, y: 0.25195312, z: 3.3759074}
+    - {x: -1.6951952, y: 1.8689098, z: -1.8108077}
+    - {x: -0.80094576, y: 1.8818359, z: -2.48818}
+    - {x: 0.093303144, y: 1.894762, z: -3.1655524}
+    - {x: -1.201044, y: 0.087441206, z: -0.69383454}
+    - {x: -1.359375, y: 0.6522615, z: -0.51414704}
     isClosed: 0
     autoSetControlPoints: 0
   anchorCol: {r: 1, g: 0, b: 0, a: 1}
@@ -678,11 +723,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDebug: 1
-  spacing: 1
-  resolution: 1
   bazierPath: {fileID: 1868323986}
-  bazierObject: {fileID: 638742425}
-  speed: 0.1
+  bazierObject: {fileID: 1804437575}
+  flipObject: 1
+  segmentResolution: 100
+  splineResolution: 0.1
+  speed: 0.0003
 --- !u!1001 &3847952264845996649
 PrefabInstance:
   m_ObjectHideFlags: 0

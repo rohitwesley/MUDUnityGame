@@ -84,7 +84,7 @@ namespace MovementTools
         /// <summary>
         /// Hover Debuger 
         /// </summary>
-        private void OnDrawGizmos()
+        private void OnDrawGizmosOnDrawGizmosSelected()
         {
             if (isDebug)
             {
