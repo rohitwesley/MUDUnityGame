@@ -16,5 +16,5 @@ MonoBehaviour:
   checkpointInLevel: 1
   pickUpsCollected: 1
   health: 100
-  timeInLevel: 60
+  timeInLevel: 10
   scoreValue: 100

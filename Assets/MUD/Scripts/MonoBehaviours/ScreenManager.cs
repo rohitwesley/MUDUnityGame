@@ -12,10 +12,6 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] public CanvasGroup winCanvasGroup;
     [SerializeField] public CanvasGroup looseCanvasGroup;
 
-    private void Start()
-    {
-        StartCoroutine(CallSplash());
-    }
 
     /// <summary>
     /// Fade Out screen
@@ -70,6 +66,16 @@ public class ScreenManager : MonoBehaviour
         yield return StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
         // fad in widget
         yield return StartCoroutine(FadeInWidget(2.0f, menuCanvasGroup));
+    }
+    public IEnumerator CloseMenu()
+    {
+        HideWidgets();
+        // fade in bg
+        //yield return StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
+        // fad out widget
+        yield return StartCoroutine(FadeOutWidget(2.0f, menuCanvasGroup));
+        // fade out bg
+        //yield return StartCoroutine(FadeOutWidget(2.0f, fadeCanvasGroup));
     }
 
     public IEnumerator CallWin()

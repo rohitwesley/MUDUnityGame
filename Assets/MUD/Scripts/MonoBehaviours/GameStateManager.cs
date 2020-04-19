@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public enum GameState
 {
+    PauseLevel,
     ActiveLevel,
     ResetLevel,
     NextLevel,
@@ -25,16 +26,15 @@ public class GameStateManager : MonoBehaviour
 
     public GameState state = GameState.ActiveLevel;
 
+    bool isPaused = true;
+
+    private void Start()
+    {
+        SplashSequence();
+    }
+
     void Update()
     {
-        foreach (Agents player in playerUnits)
-        {
-            if(player.GetAgentName() == "Player")
-            {
-                
-            }
-        }
-
         CheckGameState();
     }
 
@@ -42,37 +42,78 @@ public class GameStateManager : MonoBehaviour
     {
         foreach (GameStateData playerData in playerData)
         {
-            if (Time.frameCount % 10 == 0)
+            // update game time
+            if (Time.frameCount % 10 == 0 && !isPaused)
                 playerData.timeInLevel -= 0.1f;
 
             if (playerData.timeInLevel <= 0)
             {
-                screenManager.CallLoose();
-                state = GameState.ResetLevel;
-                StartCoroutine(EndLevel(state));
-                ResetLevelData();
+                RestartSequence();
             }
             if (playerData.checkpointInLevel >= levelData.checkpointInLevel)
             {
-                screenManager.CallWin();
-                state = GameState.NextLevel;
-                StartCoroutine(EndLevel(state));
-                ResetLevelData();
+                WinSequence();
             }
         }
 
         if (Input.GetKeyDown(_EscapeKey))
         {
-            screenManager.CallMenu();
+            isPaused = !isPaused;
+            MenuSequence();
             //QuitSequence();
         }
     }
 
+    public void SplashSequence()
+    {
+        state = GameState.PauseLevel;
+        ResetGameData();
+        StartCoroutine(screenManager.CallSplash());
+    }
+
+    public void MenuSequence()
+    {
+        if (isPaused)
+        {
+            state = GameState.PauseLevel;
+            StartCoroutine(screenManager.CallMenu());
+        }
+        else
+        {
+            state = GameState.ActiveLevel;
+            StartCoroutine(screenManager.CloseMenu());
+        }
+    }
+
+    public void StartSequence()
+    {
+        state = GameState.ActiveLevel;
+        ResetLevelData();
+        StartCoroutine(screenManager.CloseMenu());
+        isPaused = false;
+    }
+    public void WinSequence()
+    {
+        state = GameState.NextLevel;
+        ResetLevelData();
+        StartCoroutine(screenManager.CallWin());
+        StartCoroutine(UpdateLevel(state));
+        ResetLevelData();
+    }
+    public void RestartSequence()
+    {
+        state = GameState.ResetLevel;
+        ResetLevelData();
+        StartCoroutine(screenManager.CallLoose());
+        StartCoroutine(UpdateLevel(state));
+        ResetLevelData();
+    }
     public void QuitSequence()
     {
         state = GameState.QuitLevel;
         ResetGameData();
-        StartCoroutine(EndLevel(state));
+        StartCoroutine(screenManager.CallSplash());
+        StartCoroutine(UpdateLevel(state));
     }
 
     public void UpdateScore(Agents currentPlayer, int score)
@@ -138,11 +179,12 @@ public class GameStateManager : MonoBehaviour
     /// Test for end case
     /// </summary>
     /// <param name="setState"></param>
-    public IEnumerator EndLevel(GameState setState)
+    public IEnumerator UpdateLevel(GameState setState)
     {
         yield return new WaitForSeconds(2.0f);
         if (setState == GameState.ResetLevel)
         {
+            yield return new WaitForSeconds(5.0f);
             // Reload the level that is currently loaded.
             string sceneName = SceneManager.GetActiveScene().name;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);

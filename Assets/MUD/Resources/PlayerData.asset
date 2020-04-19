@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3363a115bfc18ee489f806275dc52df1, type: 3}
   m_Name: PlayerData
   m_EditorClassIdentifier: 
-  level: 0
+  level: 1
   checkpointInLevel: 0
   pickUpsCollected: 0
-  health: 0
-  timeInLevel: 0
-  scoreValue: 10
+  health: 100
+  timeInLevel: 10
+  scoreValue: 0
