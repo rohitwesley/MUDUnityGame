@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: LevelData
   m_EditorClassIdentifier: 
   level: 1
-  checkpointInLevel: 3
-  pickUpsCollected: 3
+  checkpointInLevel: 1
+  pickUpsCollected: 1
   health: 100
   timeInLevel: 60
   scoreValue: 100
