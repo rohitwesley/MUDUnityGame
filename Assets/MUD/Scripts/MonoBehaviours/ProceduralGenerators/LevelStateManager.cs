@@ -1,8 +1,8 @@
 ﻿using GameLogic;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class LevelStateManager : MonoBehaviour
 {
@@ -25,10 +25,17 @@ public class LevelStateManager : MonoBehaviour
     [Range(0, 100)]
     [SerializeField] private int randomFillPercent;
 
-    [Tooltip("Spped of Path")]
+    [Tooltip("Path Tile Prefab")]
+    [SerializeField] private PathTile pathTilePrefab;
+    [Tooltip("Path Tile Prefab")]
+    [SerializeField] private WallTile wallTilePrefab;
+
+    [Tooltip("Speed of Path")]
     [Range(0.0f, 1.0f)]
     [SerializeField] private float speed = 0.0003f;
     Vector2 currentPositonInMap = new Vector2();
+    [Tooltip("Generate Room on Map or just view the map")]
+    [SerializeField] private bool spawnRoom = true;
 
     UnitType[,] map;
 
@@ -87,24 +94,40 @@ public class LevelStateManager : MonoBehaviour
         while (activeTileLIFOStack.Count>0) // check if we can backtrack
         {
             // Every 0.5 sec. create a tile
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.1f);
             int LIFOIndex = activeTileLIFOStack.Count - 1;
-            Vector2Int directionIndex = activeTileLIFOStack[LIFOIndex] + RandomDirectionIndex(RandomDirection());
-            
-            // Backtrack if hit a dead end
-            if(IsTileInMap(directionIndex) // check if tile is in map range
-            && (map[directionIndex.x, directionIndex.y] == UnitType.Floor
-            || map[directionIndex.x, directionIndex.y] == UnitType.Path
-            || map[directionIndex.x, directionIndex.y] == UnitType.Start)) // check if it is a floor tile
+            WalkDirection direction = RandomDirection();
+            Vector2Int directionIndex = RandomDirectionIndex(direction);
+            currentPositonInMap = activeTileLIFOStack[LIFOIndex];
+            Vector2Int currentTileIndex = new Vector2Int((int)currentPositonInMap.x, (int)currentPositonInMap.y);
+            Vector2Int neighbourTileIndex = currentTileIndex + directionIndex;
+
+            // Goto Neighboring tile
+            if (IsTileInMap(neighbourTileIndex)) // check if tile is in map range
             {
-                activeTileLIFOStack.Add(directionIndex);
-                // move in direction to new floor
-                currentPositonInMap = new Vector2(directionIndex.x, directionIndex.y);
-                map[directionIndex.x, directionIndex.y] = UnitType.Path;
+                if (map[neighbourTileIndex.x, neighbourTileIndex.y] == UnitType.Floor)
+                {
+                    // move in direction to new tile and create path
+                    if (spawnRoom) CreatePath(currentTileIndex, neighbourTileIndex, direction);
+
+                    activeTileLIFOStack.Add(neighbourTileIndex);
+                    map[neighbourTileIndex.x, neighbourTileIndex.y] = UnitType.Path;
+                }
+                else // Backtrack if hit a dead end
+                {
+                    //create wall and backtrack to previous tile
+                    if (spawnRoom) CreateWall(currentTileIndex, neighbourTileIndex, direction);
+
+                    activeTileLIFOStack.Remove(neighbourTileIndex);
+                    map[neighbourTileIndex.x, neighbourTileIndex.y] = UnitType.Wall;
+                }
             }
             else
             {
-                activeTileLIFOStack.Remove(directionIndex);
+                //create wall as it is the edge of the map (send a negative index to represnet outside the map)
+                if(spawnRoom)CreateWall(currentTileIndex, new Vector2Int(-1,-1), direction);
+                activeTileLIFOStack.Remove(neighbourTileIndex);
+                map[neighbourTileIndex.x, neighbourTileIndex.y] = UnitType.Wall;
             }
 
             // Update start tile state
@@ -116,13 +139,48 @@ public class LevelStateManager : MonoBehaviour
 
     }
 
+    private void CreatePath(Vector2Int currentTileIndex, Vector2Int neighbourTileIndex, WalkDirection direction)
+    {
+        PathTile passage = Instantiate(pathTilePrefab) as PathTile;
+        passage.Initialize(currentTileIndex, neighbourTileIndex, direction);
+        GetWorldSpaceTransformOnMap(currentTileIndex, direction, passage.gameObject.transform);
+        passage = Instantiate(pathTilePrefab) as PathTile;
+        passage.Initialize(neighbourTileIndex, currentTileIndex, GetOpposite(direction));
+        GetWorldSpaceTransformOnMap(currentTileIndex, direction, passage.gameObject.transform);
+    }
+
+    private void GetWorldSpaceTransformOnMap(Vector2Int currentTileIndex, WalkDirection direction, Transform tileTransform)
+    {
+        Vector3 position = new Vector3(currentTileIndex.x - mapDimensions.x / 2, 0, currentTileIndex.y - mapDimensions.y / 2);
+        // TODO update objects when smap scale is changed
+        position *= mapCellScale;
+        tileTransform.parent = this.transform;
+        tileTransform.position = position;
+        //tileTransform.localPosition = position;
+        tileTransform.localRotation = GetWalkDirectionToWorldOrientation(direction);
+    }
+
+    private void CreateWall(Vector2Int currentTileIndex, Vector2Int neighbourTileIndex, WalkDirection direction)
+    {
+        WallTile wall = Instantiate(wallTilePrefab) as WallTile;
+        wall.Initialize(currentTileIndex, neighbourTileIndex, direction);
+        GetWorldSpaceTransformOnMap(currentTileIndex, direction, wall.gameObject.transform);
+        if (neighbourTileIndex.x >= 0 || neighbourTileIndex.y >= 0)
+        { 
+            wall = Instantiate(wallTilePrefab) as WallTile;
+            wall.Initialize(neighbourTileIndex, currentTileIndex, GetOpposite(direction));
+            GetWorldSpaceTransformOnMap(currentTileIndex, direction, wall.gameObject.transform);
+        }
+    }
+
 
     /// <summary>
     /// Fill Map functions
     /// </summary>
-    
+
     public void GenerateMap()
     {
+        StopAllCoroutines();
         // generate base map
         map = new UnitType[mapDimensions.x, mapDimensions.y];
         RandomFillMap();
@@ -137,11 +195,6 @@ public class LevelStateManager : MonoBehaviour
 
     private void RandomFillMap()
     {
-        if (useRandomSeed)
-        {
-            seed = Time.time.ToString();
-        }
-        System.Random pseudoRandom = new System.Random(seed.GetHashCode());
         for (int x = 0; x < mapDimensions.x; x++)
         {
             for (int y = 0; y < mapDimensions.y; y++)
@@ -155,11 +208,10 @@ public class LevelStateManager : MonoBehaviour
                 {
                     map[x, y] = UnitType.Floor;
                     // Randomise Tile to wall or floor
-                    map[x, y] = (pseudoRandom.Next(0, 100) < randomFillPercent) ? UnitType.Wall : UnitType.Floor;
+                    map[x, y] = (PseudoRandomGenerator(0, 100) < randomFillPercent) ? UnitType.Wall : UnitType.Floor;
                 }
             }
         }
-
     }
 
     void SmoothMap()
@@ -207,12 +259,28 @@ public class LevelStateManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Get Random number from controled deterministic seed or random seed
+    /// </summary>
+    /// <param name="minValue"></param>
+    /// <param name="maxValue"></param>
+    /// <returns></returns>
+    private int PseudoRandomGenerator(int minValue, int maxValue)
+    {
+        if (useRandomSeed)
+        {
+            seed = Time.time.ToString();
+        }
+        System.Random pseudoRandom = new System.Random(seed.GetHashCode());
+        return pseudoRandom.Next(minValue, maxValue);
+    }
+    
+    /// <summary>
     /// Get random walk direction
     /// </summary>
     /// <returns></returns>
-    private static WalkDirection RandomDirection()
-    {
-        return (WalkDirection)Random.Range(0, 4);
+    private WalkDirection RandomDirection()
+    {        
+        return (WalkDirection)PseudoRandomGenerator(0, 4);
     }
 
     /// <summary>
@@ -239,7 +307,7 @@ public class LevelStateManager : MonoBehaviour
     {
         get
         {
-            return new Vector2Int(Random.Range(0, mapDimensions.x), Random.Range(0, mapDimensions.y));
+            return new Vector2Int(PseudoRandomGenerator(0, mapDimensions.x), PseudoRandomGenerator(0, mapDimensions.y));
         }
     }
 
@@ -253,6 +321,36 @@ public class LevelStateManager : MonoBehaviour
         return (index.x >= 0 && index.x < mapDimensions.x && index.y >= 0 && index.y < mapDimensions.y);
     }
 
+    /// <summary>
+    /// Static function to get Opposit Direction
+    /// </summary>
+    /// <param name="direction"></param>
+    /// <returns></returns>
+    public static WalkDirection GetOpposite(WalkDirection direction)
+    {
+        return oppositeWalkDirection[(int)direction];
+    }
+
+    private static WalkDirection[] oppositeWalkDirection =
+    {
+        WalkDirection.South,
+        WalkDirection.West,
+        WalkDirection.North,
+        WalkDirection.East
+    };
+
+    public static Quaternion GetWalkDirectionToWorldOrientation(WalkDirection direction)
+    {
+        return walkDirectionToWorldOrientation[(int)direction];
+    }
+
+    private static Quaternion[] walkDirectionToWorldOrientation =
+    {
+       Quaternion.identity,
+       Quaternion.Euler(0f, 90f, 0f),
+       Quaternion.Euler(0f, 180f, 0f),
+       Quaternion.Euler(0f, 270f, 0f),
+    };
 
     /// <summary>
     /// Draw TileMap Debuger 
@@ -328,3 +426,23 @@ public enum WalkDirection
     South,
     West
 }
+
+public class Tile : MonoBehaviour
+{
+
+    public UnitType tileState;
+    public EdgeTile[] edges = new EdgeTile[System.Enum.GetValues(typeof(WalkDirection)).Length];
+
+    public EdgeTile GetEdge(WalkDirection direction)
+    {
+        return edges[(int)direction];
+    }
+    public void SetEdge(WalkDirection direction, EdgeTile edge)
+    {
+        edges[(int)direction] = edge;
+    }
+
+}
+
+
+
