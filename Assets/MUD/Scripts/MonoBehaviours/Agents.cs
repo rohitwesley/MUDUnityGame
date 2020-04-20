@@ -10,11 +10,14 @@ namespace GameLogic
     public enum UnitType
     {
         Floor,
-        Home,
+        Wall,
+        Path,
         Player,
-        Factory,
         Pawns,
-        PickUp
+        PickUp,
+        CheckPoint,
+        Start,
+        Exit
     }
     
     /// <summary>
@@ -24,7 +27,7 @@ namespace GameLogic
     public class Agents : MonoBehaviour
     {
 
-        public UnitType unitType = UnitType.Home;
+        public UnitType unitType = UnitType.Floor;
         public GameObject unitIcon;
 
         [Tooltip("Points")]
@@ -71,16 +74,22 @@ namespace GameLogic
             {
                 case "Floor": 
                     return UnitType.Floor;
-                case "Home": 
-                    return UnitType.Home;
+                case "Wall": 
+                    return UnitType.Wall;
+                case "Path": 
+                    return UnitType.Path;
                 case "Player": 
                     return UnitType.Player;
-                case "Factory": 
-                    return UnitType.Factory;
                 case "Pawns":
                     return UnitType.Pawns;
                 case "PickUp":
                     return UnitType.PickUp;
+                case "CheckPoint":
+                    return UnitType.CheckPoint;
+                case "Start":
+                    return UnitType.Start;
+                case "Exit":
+                    return UnitType.Exit;
                 default:
                     return UnitType.Floor;
             }
@@ -92,16 +101,22 @@ namespace GameLogic
             {
                 case UnitType.Floor: 
                     return "Floor";
-                case UnitType.Home: 
-                    return "Home";
+                case UnitType.Wall: 
+                    return "Wall";
+                case UnitType.Path: 
+                    return "Path";
                 case UnitType.Player: 
                     return "Player";
-                case UnitType.Factory: 
-                    return "Factory";
                 case UnitType.Pawns:
                     return "Pawns";
                 case UnitType.PickUp:
                     return "PickUp";
+                case UnitType.CheckPoint:
+                    return "CheckPoint";
+                case UnitType.Start:
+                    return "Start";
+                case UnitType.Exit:
+                    return "Exit";
                 default:
                     return "Floor";
             }

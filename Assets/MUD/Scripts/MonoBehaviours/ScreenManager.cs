@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ScreenManager : MonoBehaviour
@@ -11,7 +10,6 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] public CanvasGroup gameModeCanvasGroup;
     [SerializeField] public CanvasGroup winCanvasGroup;
     [SerializeField] public CanvasGroup looseCanvasGroup;
-
 
     /// <summary>
     /// Fade Out screen
@@ -45,17 +43,17 @@ public class ScreenManager : MonoBehaviour
         fadeCanvas.alpha = 1.0f;
     }
 
-
     public IEnumerator CallSplash()
     {
         HideWidgets();
         // fade in bg
-        yield return StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
+        StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
         // fad in widget
         yield return StartCoroutine(FadeInWidget(2.0f, splashCanvasGroup));
         float fadeDuration = 2.0f;
         yield return new WaitForSeconds(fadeDuration);
         yield return StartCoroutine(FadeOutWidget(2.0f, splashCanvasGroup));
+        //StartCoroutine(FadeOutWidget(2.0f, fadeCanvasGroup));
         yield return StartCoroutine(CallMenu());
     }
 
@@ -63,26 +61,24 @@ public class ScreenManager : MonoBehaviour
     {
         HideWidgets();
         // fade in bg
-        yield return StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
+        StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
         // fad in widget
         yield return StartCoroutine(FadeInWidget(2.0f, menuCanvasGroup));
     }
     public IEnumerator CloseMenu()
     {
         HideWidgets();
-        // fade in bg
-        //yield return StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
+        // fade out bg
+        StartCoroutine(FadeOutWidget(2.0f, fadeCanvasGroup));
         // fad out widget
         yield return StartCoroutine(FadeOutWidget(2.0f, menuCanvasGroup));
-        // fade out bg
-        //yield return StartCoroutine(FadeOutWidget(2.0f, fadeCanvasGroup));
     }
 
     public IEnumerator CallWin()
     {
         HideWidgets();
         // fade in bg
-        yield return StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
+        StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
         // fad in widget
         yield return StartCoroutine(FadeInWidget(2.0f, winCanvasGroup));
     }
@@ -91,7 +87,7 @@ public class ScreenManager : MonoBehaviour
     {
         HideWidgets();
         // fade in bg
-        yield return StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
+        StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
         // fad in widget
         yield return StartCoroutine(FadeInWidget(2.0f, looseCanvasGroup));
     }
@@ -100,7 +96,7 @@ public class ScreenManager : MonoBehaviour
     {
         HideWidgets();
         // fade in bg
-        yield return StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
+        StartCoroutine(FadeInWidget(2.0f, fadeCanvasGroup));
         // fad in widget
         yield return StartCoroutine(FadeInWidget(2.0f, gameModeCanvasGroup));
     }

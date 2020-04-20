@@ -8,12 +8,10 @@ public class GameStateManagerEditor : Editor
     GameStateManager gameState;
     void OnSceneGUI()
     {
-        /*GameState gameState = (GameState)target;*/
         if (gameState == null)
         {
             return;
         }
-
         // Draw GUI Info in Screen Space
         Handles.BeginGUI();
         foreach (GameStateData playerData in gameState.playerData)

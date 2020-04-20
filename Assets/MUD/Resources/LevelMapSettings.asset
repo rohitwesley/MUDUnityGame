@@ -1,0 +1,122 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df86429a191ffd74b9a77ae753213486, type: 3}
+  m_Name: LevelMapSettings
+  m_EditorClassIdentifier: 
+  mode: 0
+  resolution: 128
+  resolutionLOD: 512
+  autoUpdate: 1
+  IsGeneraterMesh: 1
+  IsNavMeshSurfaceSet: 0
+  planetRadius: 1
+  faceIndex: 0
+  TotalSides: 3
+  noiseLayers:
+  - enabled: 1
+    useFirstLayerAsMask: 1
+    noiseSettings:
+      filterType: 0
+      simplexNoiseSettings:
+        seed: 2
+        strength: 1.67
+        numLayers: 2
+        baseRoughness: 0.3
+        roughness: 0.83
+        persistence: 0.46
+        centre: {x: 0, y: 0, z: 0}
+        minValue: 0.81
+      rigidNoiseSettings:
+        seed: 0
+        strength: 0
+        numLayers: 0
+        baseRoughness: 0
+        roughness: 0
+        persistence: 0
+        centre: {x: 0, y: 0, z: 0}
+        minValue: 0
+        weightMultiplier: 0
+  planeFaces:
+  - {fileID: 0}
+  terrainMaterialLake:
+    baseMap: {fileID: 0}
+    maskMap: {fileID: 0}
+    normalMap: {fileID: 0}
+    detailHeightMap: {fileID: 0}
+  terrainMaterialMud:
+    baseMap: {fileID: 0}
+    maskMap: {fileID: 0}
+    normalMap: {fileID: 0}
+    detailHeightMap: {fileID: 0}
+  terrainMaterialMoss:
+    baseMap: {fileID: 0}
+    maskMap: {fileID: 0}
+    normalMap: {fileID: 0}
+    detailHeightMap: {fileID: 0}
+  mapColor: {r: 0, g: 0, b: 0, a: 0}
+  mapElevation:
+    serializedVersion: 2
+    key0: {r: 1, g: 1, b: 1, a: 1}
+    key1: {r: 1, g: 1, b: 1, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  biomeSettings:
+    biomes: []
+    noiseSettings:
+      filterType: 0
+      simplexNoiseSettings:
+        seed: 0
+        strength: 1
+        numLayers: 4
+        baseRoughness: 1
+        roughness: 2
+        persistence: 0.5
+        centre: {x: 0, y: 0, z: 0}
+        minValue: 0.5
+      rigidNoiseSettings:
+        seed: 0
+        strength: 1
+        numLayers: 4
+        baseRoughness: 1
+        roughness: 2
+        persistence: 0.5
+        centre: {x: 0, y: 0, z: 0}
+        minValue: 0.5
+        weightMultiplier: 0.8
+    noiseOffset: 0
+    noiseStrength: 0
+    blendAmount: 0
+  mapPlanetMaterial: {fileID: 2100000, guid: 6216fbe48eeac4b88bec520371e8eb61, type: 2}
+  mapTerrainMaterial: {fileID: 0}

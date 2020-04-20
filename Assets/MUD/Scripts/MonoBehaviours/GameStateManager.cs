@@ -52,7 +52,7 @@ public class GameStateManager : MonoBehaviour
             }
             if (playerData.checkpointInLevel >= levelData.checkpointInLevel)
             {
-                WinSequence();
+                //WinSequence();
             }
         }
 
@@ -67,6 +67,7 @@ public class GameStateManager : MonoBehaviour
     public void SplashSequence()
     {
         state = GameState.PauseLevel;
+        isPaused = true;
         ResetGameData();
         StartCoroutine(screenManager.CallSplash());
     }
@@ -92,25 +93,31 @@ public class GameStateManager : MonoBehaviour
         StartCoroutine(screenManager.CloseMenu());
         isPaused = false;
     }
+    
     public void WinSequence()
     {
         state = GameState.NextLevel;
+        isPaused = true;
         ResetLevelData();
         StartCoroutine(screenManager.CallWin());
         StartCoroutine(UpdateLevel(state));
         ResetLevelData();
     }
+    
     public void RestartSequence()
     {
         state = GameState.ResetLevel;
+        isPaused = true;
         ResetLevelData();
         StartCoroutine(screenManager.CallLoose());
         StartCoroutine(UpdateLevel(state));
         ResetLevelData();
     }
+    
     public void QuitSequence()
     {
         state = GameState.QuitLevel;
+        isPaused = true;
         ResetGameData();
         StartCoroutine(screenManager.CallSplash());
         StartCoroutine(UpdateLevel(state));

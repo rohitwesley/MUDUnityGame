@@ -63,7 +63,7 @@ public class AgentAI : MonoBehaviour
 
     private void SearchForTarget(float sec)
     {
-        Debug.Log("Agent Searching");
+        // Debug.Log("Agent Searching");
         Vector3 searchCenter = transform.position;
         destinationTransform.Clear();
         destinationFound = false;
