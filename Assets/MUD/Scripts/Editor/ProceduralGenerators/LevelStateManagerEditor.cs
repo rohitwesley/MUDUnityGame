@@ -23,7 +23,7 @@ public class LevelStateManagerEditor : Editor
         }
         if (GUILayout.Button("Clear Level"))
         {
-            LevelGen.ClearWalk();
+            LevelGen.ResetMap();
         }
     }
 

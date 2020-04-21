@@ -37,7 +37,7 @@ public class LevelStateManager : MonoBehaviour
     [Tooltip("Generate Room on Map or just view the map")]
     [SerializeField] private bool spawnRoom = true;
 
-    UnitType[,] map;
+    LevelTile[,] map;
 
     private void Start()
     {
@@ -46,9 +46,7 @@ public class LevelStateManager : MonoBehaviour
 
     public void GenerateMap()
     {
-        //StopAllCoroutines();
-        // generate base map
-        map = new UnitType[mapDimensions.x, mapDimensions.y];
+        ResetMap();
         RandomFillMap();
         // smooth borders
         for (int i = 0; i < smoothStep; i++)
@@ -58,9 +56,22 @@ public class LevelStateManager : MonoBehaviour
         // walk te map and create level
         Walk();
     }
-    public void ClearWalk()
+    public void ResetMap()
     {
         StopAllCoroutines();
+        // generate base map
+        map = new LevelTile[mapDimensions.x, mapDimensions.y];
+        // Create clean TileMap
+        for (int x = 0; x < mapDimensions.x; x++)
+        {
+            // Debug.Log("Drawing Maze Row" + x);
+            for (int y = 0; y < mapDimensions.y; y++)
+            {
+                LevelTile newTile = new LevelTile();
+                newTile.tileState = UnitType.Floor;
+                map[x, y] = newTile;
+            }
+        }
     }
 
     /// <summary>
@@ -101,7 +112,7 @@ public class LevelStateManager : MonoBehaviour
     private IEnumerator randomWalk()
     {
         // Start at random floor tile
-        while (map[(int)currentPositonInMap.x, (int)currentPositonInMap.y] != UnitType.Floor)
+        while (map[(int)currentPositonInMap.x, (int)currentPositonInMap.y].tileState != UnitType.Floor)
             currentPositonInMap = RandomTileIndex;
         Vector2Int pathStartIndex = new Vector2Int((int)currentPositonInMap.x, (int)currentPositonInMap.y);
 
@@ -123,35 +134,33 @@ public class LevelStateManager : MonoBehaviour
             // Goto Neighboring tile
             if (IsTileInMap(neighbourTileIndex)) // check if tile is in map range
             {
-                if (map[neighbourTileIndex.x, neighbourTileIndex.y] == UnitType.Floor)
+                if (map[neighbourTileIndex.x, neighbourTileIndex.y].tileState == UnitType.Floor)
                 {
                     // move in direction to new tile and create path
                     if (spawnRoom) CreatePath(currentTileIndex, neighbourTileIndex, direction);
-
+                    map[neighbourTileIndex.x, neighbourTileIndex.y].tileState = UnitType.Path;
                     activeTileLIFOStack.Add(neighbourTileIndex);
-                    map[neighbourTileIndex.x, neighbourTileIndex.y] = UnitType.Path;
                 }
                 else // Backtrack if hit a dead end
                 {
                     //create wall and backtrack to previous tile
                     if (spawnRoom) CreateWall(currentTileIndex, neighbourTileIndex, direction);
-
+                    map[neighbourTileIndex.x, neighbourTileIndex.y].tileState = UnitType.Wall;
                     activeTileLIFOStack.Remove(neighbourTileIndex);
-                    map[neighbourTileIndex.x, neighbourTileIndex.y] = UnitType.Wall;
                 }
             }
             else
             {
                 //create wall as it is the edge of the map (send a negative index to represnet outside the map)
                 if(spawnRoom)CreateWall(currentTileIndex, new Vector2Int(-1,-1), direction);
+                map[neighbourTileIndex.x, neighbourTileIndex.y].tileState = UnitType.Wall;
                 activeTileLIFOStack.Remove(neighbourTileIndex);
-                map[neighbourTileIndex.x, neighbourTileIndex.y] = UnitType.Wall;
             }
 
             // Update start tile state
-            if (map[pathStartIndex.x, pathStartIndex.y] != UnitType.Start)
+            if (map[pathStartIndex.x, pathStartIndex.y].tileState != UnitType.Start)
             {
-                map[pathStartIndex.x, pathStartIndex.y] = UnitType.Start;
+                map[pathStartIndex.x, pathStartIndex.y].tileState = UnitType.Start;
             }
         }
 
@@ -210,13 +219,13 @@ public class LevelStateManager : MonoBehaviour
                 //Map Edge Walls
                 if (x == 0 || x == mapDimensions.x - 1 || y == 0 || y == mapDimensions.y - 1)
                 {
-                    map[x, y] = UnitType.Wall;
+                    map[x, y].tileState = UnitType.Wall;
                 }
                 else
                 {
-                    map[x, y] = UnitType.Floor;
+                    map[x, y].tileState = UnitType.Floor;
                     // Randomise Tile to wall or floor
-                    map[x, y] = (pseudoRandom.Next(0, 100) < randomFillPercent) ? UnitType.Wall : UnitType.Floor;
+                    map[x, y].tileState = (pseudoRandom.Next(0, 100) < randomFillPercent) ? UnitType.Wall : UnitType.Floor;
                 }
             }
         }
@@ -231,9 +240,9 @@ public class LevelStateManager : MonoBehaviour
                 int neighbourWallTiles = GetSurroundingAgentCount(new Vector2Int(x,y), UnitType.Wall);
 
                 if (neighbourWallTiles > 4)
-                    map[x, y] = UnitType.Wall;
+                    map[x, y].tileState = UnitType.Wall;
                 else if (neighbourWallTiles < 4)
-                    map[x, y] = UnitType.Floor;
+                    map[x, y].tileState = UnitType.Floor;
 
             }
         }
@@ -252,7 +261,7 @@ public class LevelStateManager : MonoBehaviour
                     if (neighbourX != index.x || neighbourY != index.y)
                     {
                         // if is a wall tile
-                        if (map[neighbourX, neighbourY] == agentType) agentCount++;// += map[neighbourX, neighbourY];
+                        if (map[neighbourX, neighbourY].tileState == agentType) agentCount++;// += map[neighbourX, neighbourY];
                     }
                 }
                 else
@@ -388,24 +397,24 @@ public class LevelStateManager : MonoBehaviour
                     position = new Vector3(x - mapDimensions.x / 2, 0,y - mapDimensions.y / 2);
                     position *= mapCellScale;
 
-                    if (map[x, y] == UnitType.Start)
+                    if (map[x, y].tileState == UnitType.Start)
                     {
                         Gizmos.color = Color.Lerp(Color.red, Color.yellow, 0.25f);
                         Gizmos.DrawCube(position, Vector3.one * mapCellScale);
                     }
-                    else if (map[x, y] == UnitType.Path)
+                    else if (map[x, y].tileState == UnitType.Path)
                     {
                         Gizmos.color = Color.Lerp(Color.red, Color.yellow, 0.75f);
                         Gizmos.DrawCube(position, Vector3.one * mapCellScale);
                     }
-                    else if (map[x, y] == UnitType.Wall)
+                    else if (map[x, y].tileState == UnitType.Wall)
                     {
                         Gizmos.color = Color.Lerp(Color.green, Color.yellow, 0.25f);
                         Gizmos.DrawCube(position, Vector3.one * mapCellScale);
                     }
-                    else if (map[x, y] == UnitType.Floor)
+                    else if (map[x, y].tileState == UnitType.Floor)
                     {
-                        Gizmos.color = Color.Lerp(Color.green, Color.yellow, 0.75f);
+                        Gizmos.color = Color.white;
                         Gizmos.DrawWireCube(position, Vector3.one * mapCellScale);
                     }
                     else
