@@ -34,6 +34,7 @@ namespace MovementTools
             {
                 Undo.RecordObject(creator, "Toggle closed");
                 Path.IsClosed = isClosed;
+
             }
 
             bool autoSetControlPoints = GUILayout.Toggle(Path.AutoSetControlPoints, "Auto Set Control Points");

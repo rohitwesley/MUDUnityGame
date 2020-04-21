@@ -13,17 +13,17 @@ public class LevelStateManagerEditor : Editor
             base.OnInspectorGUI();
             if (checkUpdate.changed)
             {
-                LevelGen.GenerateMap();
+                //LevelGen.GenerateMap();
             }
         }
 
         if (GUILayout.Button("Generate Level"))
         {
-            LevelGen.GenerateMap();
+            //LevelGen.GenerateMap();
         }
         if (GUILayout.Button("Clear Level"))
         {
-            LevelGen.ResetMap();
+           // LevelGen.ResetMap();
         }
     }
 

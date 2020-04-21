@@ -30,13 +30,21 @@ namespace MovementTools
         [Tooltip("Show Control Points Gizmos")]
         [SerializeField] public bool displayControlPoints = true;
 
+        Transform splinePath;
+
+        private void Update()
+        {
+            if (splinePath != transform)
+                Reset();
+        }
         public void CreatePath()
         {
-            path = new BezierCurve(transform.position);
+            path = new BezierCurve(splinePath.position);
         }
 
-        void Reset()
+        public void Reset()
         {
+            splinePath = transform;
             CreatePath();
         }
 
