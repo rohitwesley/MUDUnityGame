@@ -9,6 +9,6 @@ EditorBuildSettings:
     path: Assets/MUD/Scenes/Prototype.unity
     guid: 260b5968bdf1bbc4e95e538bf88289bb
   - enabled: 1
-    path: Assets/MUD/Scenes/Prototype 1.unity
+    path: Assets/MUD/Scenes/Prototype LevelGenerator.unity
     guid: 8663e98a9875596409a691d147cea83b
   m_configObjects: {}
