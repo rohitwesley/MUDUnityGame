@@ -29,9 +29,24 @@ The objective of the game is to explore the Castle for loot while making sure Co
 ## Inputs :
 
 ## Features :
+* Procedural Generated levels
+* 3rd person and 1st person Experience in VR or PC
 
 ## WIP :
 
 ## TODO Prototype:
+[] Spawn Ghost at stragic points in the room
+[] Use procedural animation for ghost to patrole,die,chase,capture states
+[] Create intelegent Ghost patrol Mechanic
+[] Create Ghost Chase Mechanic
+[] Create Ghost Die Animation
+[] Create Ghost Capture Mechanic
+[] Get Input Trigger and Input Joystic Movement
+[] Move Player in 3rd Person and 1st Person
+[] Create Sticky Slime Teleport for scanning the area
+[] Create Sneaky Sleeper Mechanic to chase the ghost and absorbe his energy.
+[] Create Ghost Capture Mechanic
+[] add sound FX to mechanics - spells, walking, ghost moving, ghost chase
+[] add sound FX to gamestat - win,loose,pause,ingame music
 
 ## TODO Final:
