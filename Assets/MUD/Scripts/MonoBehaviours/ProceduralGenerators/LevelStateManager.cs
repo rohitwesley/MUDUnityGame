@@ -44,10 +44,28 @@ public class LevelStateManager : MonoBehaviour
         GenerateMap();
     }
 
+    public void GenerateMap()
+    {
+        //StopAllCoroutines();
+        // generate base map
+        map = new UnitType[mapDimensions.x, mapDimensions.y];
+        RandomFillMap();
+        // smooth borders
+        for (int i = 0; i < smoothStep; i++)
+        {
+            SmoothMap();
+        }
+        // walk te map and create level
+        Walk();
+    }
+    public void ClearWalk()
+    {
+        StopAllCoroutines();
+    }
+
     /// <summary>
     /// Walk on Tile Map functions
     /// </summary>
-    
     private void Walk()
     {
         // scan for a floor tile
@@ -63,7 +81,7 @@ public class LevelStateManager : MonoBehaviour
         while (IsTileInMap(mapIndex))
         { 
             // Every half a sec. create a tile
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.1f);
             mapIndex = new Vector2Int((int)currentPositonInMap.x % mapDimensions.x, (int)currentPositonInMap.y % mapDimensions.y);
             // Update the current position on the spline based on the speed and spline segment count
             float speedSpline = (float)mapDimensions.x * speed;
@@ -178,23 +196,13 @@ public class LevelStateManager : MonoBehaviour
     /// Fill Map functions
     /// </summary>
 
-    public void GenerateMap()
-    {
-        StopAllCoroutines();
-        // generate base map
-        map = new UnitType[mapDimensions.x, mapDimensions.y];
-        RandomFillMap();
-        // smooth borders
-        for (int i = 0; i < smoothStep; i++)
-        {
-            SmoothMap();
-        }
-        // walk te map and create level
-        Walk();
-    }
-
     private void RandomFillMap()
     {
+        if (useRandomSeed)
+        {
+            seed = Time.time.ToString();
+        }
+        System.Random pseudoRandom = new System.Random(seed.GetHashCode());
         for (int x = 0; x < mapDimensions.x; x++)
         {
             for (int y = 0; y < mapDimensions.y; y++)
@@ -208,7 +216,7 @@ public class LevelStateManager : MonoBehaviour
                 {
                     map[x, y] = UnitType.Floor;
                     // Randomise Tile to wall or floor
-                    map[x, y] = (PseudoRandomGenerator(0, 100) < randomFillPercent) ? UnitType.Wall : UnitType.Floor;
+                    map[x, y] = (pseudoRandom.Next(0, 100) < randomFillPercent) ? UnitType.Wall : UnitType.Floor;
                 }
             }
         }
@@ -257,30 +265,19 @@ public class LevelStateManager : MonoBehaviour
 
         return agentCount;
     }
-
-    /// <summary>
-    /// Get Random number from controled deterministic seed or random seed
-    /// </summary>
-    /// <param name="minValue"></param>
-    /// <param name="maxValue"></param>
-    /// <returns></returns>
-    private int PseudoRandomGenerator(int minValue, int maxValue)
-    {
-        if (useRandomSeed)
-        {
-            seed = Time.time.ToString();
-        }
-        System.Random pseudoRandom = new System.Random(seed.GetHashCode());
-        return pseudoRandom.Next(minValue, maxValue);
-    }
     
     /// <summary>
     /// Get random walk direction
     /// </summary>
     /// <returns></returns>
     private WalkDirection RandomDirection()
-    {        
-        return (WalkDirection)PseudoRandomGenerator(0, 4);
+    {
+        if (useRandomSeed)
+        {
+            seed = Time.time.ToString();
+        }
+        System.Random pseudoRandom = new System.Random(seed.GetHashCode());
+        return (WalkDirection)pseudoRandom.Next(0, 4);
     }
 
     /// <summary>
@@ -307,7 +304,12 @@ public class LevelStateManager : MonoBehaviour
     {
         get
         {
-            return new Vector2Int(PseudoRandomGenerator(0, mapDimensions.x), PseudoRandomGenerator(0, mapDimensions.y));
+            if (useRandomSeed)
+            {
+                seed = Time.time.ToString();
+            }
+            System.Random pseudoRandom = new System.Random(seed.GetHashCode());
+            return new Vector2Int(pseudoRandom.Next(0, mapDimensions.x), pseudoRandom.Next(0, mapDimensions.y));
         }
     }
 
@@ -361,16 +363,17 @@ public class LevelStateManager : MonoBehaviour
         {
             Vector2 mapSmoothIndex = new Vector2(currentPositonInMap.x%(mapDimensions.x), currentPositonInMap.y%mapDimensions.y);
             Vector2Int mapIndex = new Vector2Int((int)currentPositonInMap.x%mapDimensions.x, (int)currentPositonInMap.y%mapDimensions.y);
-        
             Vector3 position = new Vector3(-mapDimensions.y / 2 + mapIndex.x, 0, -mapDimensions.y / 2 + mapIndex.y);
             position *= mapCellScale;
-        
-            if(GetSurroundingAgentCount(mapIndex, UnitType.Wall)>0)
+
+            // Debug.Log("Current Point - mapSmoothIndex: " + mapSmoothIndex + "mapIndex: " + mapIndex + "position: " + position);
+            // check if near a wall
+            if (GetSurroundingAgentCount(mapIndex, UnitType.Wall)>0)
                 Gizmos.color = Color.red;
             else
                 Gizmos.color = Color.yellow;
-
             Gizmos.DrawCube(position, Vector3.one * mapCellScale);
+            // smooth step from one box to the next
             position = new Vector3(-mapDimensions.x / 2 + mapSmoothIndex.x, 0, -mapDimensions.y / 2 + mapSmoothIndex.y);
             position *= mapCellScale;
             Gizmos.color = Color.blue;
@@ -390,19 +393,19 @@ public class LevelStateManager : MonoBehaviour
                         Gizmos.color = Color.Lerp(Color.red, Color.yellow, 0.25f);
                         Gizmos.DrawCube(position, Vector3.one * mapCellScale);
                     }
-                    else if (map[x, y] == UnitType.Wall)
-                    {
-                        Gizmos.color = Color.Lerp(Color.red, Color.yellow, 0.5f);
-                        Gizmos.DrawCube(position, Vector3.one * mapCellScale);
-                    }
                     else if (map[x, y] == UnitType.Path)
                     {
                         Gizmos.color = Color.Lerp(Color.red, Color.yellow, 0.75f);
                         Gizmos.DrawCube(position, Vector3.one * mapCellScale);
                     }
+                    else if (map[x, y] == UnitType.Wall)
+                    {
+                        Gizmos.color = Color.Lerp(Color.green, Color.yellow, 0.25f);
+                        Gizmos.DrawCube(position, Vector3.one * mapCellScale);
+                    }
                     else if (map[x, y] == UnitType.Floor)
                     {
-                        Gizmos.color = Color.green;
+                        Gizmos.color = Color.Lerp(Color.green, Color.yellow, 0.75f);
                         Gizmos.DrawWireCube(position, Vector3.one * mapCellScale);
                     }
                     else

@@ -21,6 +21,10 @@ public class LevelStateManagerEditor : Editor
         {
             LevelGen.GenerateMap();
         }
+        if (GUILayout.Button("Clear Level"))
+        {
+            LevelGen.ClearWalk();
+        }
     }
 
     private void OnEnable()
