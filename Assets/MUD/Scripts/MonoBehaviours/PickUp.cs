@@ -16,8 +16,8 @@ public class PickUp : MonoBehaviour
                 Debug.Log("Player PickUp");
                 gameObject.SetActive(false);
                 Destroy(gameObject);
-                FindObjectsOfType<GameStateManager>()[0].UpdateScore(other.gameObject.GetComponent<Agents>(), gameObject.GetComponent<Agents>().pointsValue);
-                FindObjectsOfType<GameStateManager>()[0].UpdatePickups(other.gameObject.GetComponent<Agents>());
+                FindObjectsOfType<GameManager>()[0].UpdateScore(other.gameObject.GetComponent<Agents>(), gameObject.GetComponent<Agents>().pointsValue);
+                FindObjectsOfType<GameManager>()[0].UpdatePickups(other.gameObject.GetComponent<Agents>());
             }
         }
     }

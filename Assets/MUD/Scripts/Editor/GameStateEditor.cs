@@ -2,10 +2,10 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(GameStateManager))]
-public class GameStateManagerEditor : Editor
+[CustomEditor(typeof(GameManager))]
+public class GameManagerEditor : Editor
 {
-    GameStateManager gameState;
+    GameManager gameState;
     void OnSceneGUI()
     {
         if (gameState == null)
@@ -34,7 +34,7 @@ public class GameStateManagerEditor : Editor
 
     private void OnEnable()
     {
-        gameState = (GameStateManager)target;
+        gameState = (GameManager)target;
     }
 
 }

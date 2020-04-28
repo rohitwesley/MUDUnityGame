@@ -16,7 +16,7 @@ public class CheckPoint : MonoBehaviour
                 Debug.Log("Player PickUp");
                 gameObject.SetActive(false);
                 Destroy(gameObject);
-                FindObjectsOfType<GameStateManager>()[0].UpdateCheckpoints(other.gameObject.GetComponent<Agents>());
+                FindObjectsOfType<GameManager>()[0].UpdateCheckpoints(other.gameObject.GetComponent<Agents>());
             }
         }
     }

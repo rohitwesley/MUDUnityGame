@@ -8,6 +8,8 @@ public class LevelStateManager : MonoBehaviour
     /// <summary>
     /// Procedural Level Map Model
     /// </summary>
+    /// [Tooltip("reference to the game manager")]
+	[SerializeField] GameManager gameManager;
     [SerializeField] private string seed;
     [SerializeField] private bool useRandomSeed;
     [SerializeField] private int smoothStep = 5;
@@ -23,18 +25,21 @@ public class LevelStateManager : MonoBehaviour
     [SerializeField] private int randomFillPercent;
 
     [Tooltip("Floor Tile Prefab")]
-    [SerializeField] private MazeCell MazeCellPrefab;
+    [SerializeField] private LevelCell MazeCellPrefab;
     [Tooltip("Path Tile Prefab")]
-    [SerializeField] private MazePassage MazePassagePrefab;
+    [SerializeField] private LevelPath LevelPassagePrefab;
     [Tooltip("Door Tile Prefab")]
-    [SerializeField] private MazeDoor MazeDoorPrefab;
+    [SerializeField] private LevelDoor LevelDoorPrefab;
     [Range(0.0f, 1.0f)]
     [SerializeField] private float doorProbability = 0.1f;
     [Tooltip("Wall Tile Prefab")]
-    [SerializeField] private MazeWall[] MazeWallPrefab;
+    [SerializeField] private LevelWall[] MazeWallPrefab;
     [Tooltip("Room Settings")]
-    [SerializeField] private MazeRoomSettings[] roomSettings;
-    
+    [SerializeField] private LevelRoomSettings[] roomSettings;
+    //[Range(1, 100)]
+    [SerializeField] private IntVector2 mapDimensions;
+    private LevelCell[,] map;
+    private List<LevelRoom> rooms = new List<LevelRoom>();    
 
     [Tooltip("Speed of Path")]
     [Range(0.0f, 1.0f)]
@@ -42,61 +47,30 @@ public class LevelStateManager : MonoBehaviour
     Vector2 currentPositonInMap = new Vector2();
     [Tooltip("Generate Room on Map or just view the map")]
     [SerializeField] private bool spawnRoom = true;
-    //[Range(1, 100)]
-    [SerializeField] private IntVector2 mapDimensions;
-
-    private MazeCell[,] map;
-    private List<MazeRoom> rooms = new List<MazeRoom>();
-
-    private void Start()
-    {
-        GenerateMap();
-    }
 
     public void GenerateMap()
     {
-        ResetMap();
-        RandomFillMap();
-        // smooth borders
-        for (int i = 0; i < smoothStep; i++)
-        {
-            SmoothMap();
-        }
         // walk te map and create level
         Walk();
-    }
-    
-    public void ResetMap()
-    {
-        StopAllCoroutines();
-        //TODO clear map objects before recreating map
-        // generate base map
-        map = new MazeCell[mapDimensions.x, mapDimensions.z];
-        // Create clean TileMap
-        for (int x = 0; x < mapDimensions.x; x++)
-        {
-            // Debug.Log("Drawing Maze Row" + x);
-            for (int y = 0; y < mapDimensions.z; y++)
-            {
-                CreateCell(RandomCoordinates);
-            }
-        }
     }
 
     /// <summary>
     /// Walk on Tile Map functions
     /// </summary>
     private void Walk()
-    {
-        // scan for a floor tile
-        //StartCoroutine(scannRowWalk());
-        
+    {       
         // walk from floor tile
         StartCoroutine(randomWalk());
     }
 
     private IEnumerator scannRowWalk()
     {
+        UnitType[,] mapState = RandomFillMap();
+        // smooth borders
+        for (int i = 0; i < smoothStep; i++)
+        {
+            mapState = SmoothMap(mapState);
+        }
         Vector2Int mapIndex = new Vector2Int((int)currentPositonInMap.x % mapDimensions.x, (int)currentPositonInMap.y % mapDimensions.z);
         while (IsTileInMap(mapIndex) && mapIndex.x <= mapDimensions.x - 1 && mapIndex.y <= mapDimensions.z - 1)
         { 
@@ -115,43 +89,52 @@ public class LevelStateManager : MonoBehaviour
                     currentPositonInMap.y = 0.0f;
                 }
             }
+            // TODO set up boundry wall based on cave generator
+            if(mapState[mapIndex.x, mapIndex.y] == UnitType.Wall)
+            {
+
+            }
         }
     }
 
     private IEnumerator randomWalk()
     {
-        WaitForSeconds delay = new WaitForSeconds(0.01f);
-        map = new MazeCell[mapDimensions.x, mapDimensions.z];
-        List<MazeCell> activeCells = new List<MazeCell>();
+        WaitForSeconds delay = new WaitForSeconds(speed);
+        map = new LevelCell[mapDimensions.x, mapDimensions.z];
+        List<LevelCell> activeCells = new List<LevelCell>();
         DoFirstGenerationStep(activeCells);
         while (activeCells.Count > 0)
         {
             yield return delay;
             DoNextGenerationStep(activeCells);
         }
+        yield return delay;
+        // scan for a floor tile
+        yield return StartCoroutine(scannRowWalk());
+        gameManager.StartSequence();
     }
 
-    private void DoFirstGenerationStep(List<MazeCell> activeCells)
+    private void DoFirstGenerationStep(List<LevelCell> activeCells)
     {
-        MazeCell newCell = CreateCell(RandomCoordinates);
+        LevelCell newCell = CreateCell(RandomCoordinates);
         newCell.Initialize(CreateRoom(-1));
         activeCells.Add(newCell);
     }
 
-    private void DoNextGenerationStep(List<MazeCell> activeCells)
+    private void DoNextGenerationStep(List<LevelCell> activeCells)
     {
         int currentIndex = activeCells.Count - 1;
-        MazeCell currentCell = activeCells[currentIndex];
+        LevelCell currentCell = activeCells[currentIndex];
         if (currentCell.IsFullyInitialized)
         {
             activeCells.RemoveAt(currentIndex);
             return;
         }
-        MazeDirection direction = currentCell.RandomUninitializedDirection;
+        LevelDirection direction = currentCell.RandomUninitializedDirection;
         IntVector2 coordinates = currentCell.coordinates + direction.ToIntVector2();
         if (ContainsCoordinates(coordinates))
         {
-            MazeCell neighbor = GetCell(coordinates);
+            LevelCell neighbor = GetCell(coordinates);
             if (neighbor == null)
             {
                 neighbor = CreateCell(coordinates);
@@ -173,24 +156,25 @@ public class LevelStateManager : MonoBehaviour
         }
     }
 
-    private MazeCell CreateCell(IntVector2 coordinates)
+    private LevelCell CreateCell(IntVector2 coordinates)
     {
-        MazeCell newCell = Instantiate(MazeCellPrefab) as MazeCell;
+        LevelCell newCell = Instantiate(MazeCellPrefab) as LevelCell;
         map[coordinates.x, coordinates.z] = newCell;
         newCell.coordinates = coordinates;
         newCell.name = "Maze Cell " + coordinates.x + ", " + coordinates.z;
         newCell.transform.parent = transform;
+        newCell.tileState = UnitType.Floor;
         newCell.transform.localPosition = new Vector3(coordinates.x - mapDimensions.x * 0.5f + 0.5f, 0f, coordinates.z - mapDimensions.z * 0.5f + 0.5f);
         return newCell;
     }
 
-    private void CreatePassage(MazeCell cell, MazeCell otherCell, MazeDirection direction)
+    private void CreatePassage(LevelCell cell, LevelCell otherCell, LevelDirection direction)
     {
-        MazePassage prefab = Random.value < doorProbability ? MazeDoorPrefab : MazePassagePrefab;
-        MazePassage passage = Instantiate(prefab) as MazePassage;
+        LevelPath prefab = Random.value < doorProbability ? LevelDoorPrefab : LevelPassagePrefab;
+        LevelPath passage = Instantiate(prefab) as LevelPath;
         passage.Initialize(cell, otherCell, direction);
-        passage = Instantiate(prefab) as MazePassage;
-        if (passage is MazeDoor)
+        passage = Instantiate(prefab) as LevelPath;
+        if (passage is LevelDoor)
         {
             otherCell.Initialize(CreateRoom(cell.room.settingsIndex));
         }
@@ -199,37 +183,39 @@ public class LevelStateManager : MonoBehaviour
             otherCell.Initialize(cell.room);
         }
         passage.Initialize(otherCell, cell, direction.GetOpposite());
+        cell.tileState = UnitType.Path;
     }
 
-    private void CreatePassageInSameRoom(MazeCell cell, MazeCell otherCell, MazeDirection direction)
+    private void CreatePassageInSameRoom(LevelCell cell, LevelCell otherCell, LevelDirection direction)
     {
-        MazePassage passage = Instantiate(MazePassagePrefab) as MazePassage;
+        LevelPath passage = Instantiate(LevelPassagePrefab) as LevelPath;
         passage.Initialize(cell, otherCell, direction);
-        passage = Instantiate(MazePassagePrefab) as MazePassage;
+        passage = Instantiate(LevelPassagePrefab) as LevelPath;
         passage.Initialize(otherCell, cell, direction.GetOpposite());
         if (cell.room != otherCell.room)
         {
-            MazeRoom roomToAssimilate = otherCell.room;
+            LevelRoom roomToAssimilate = otherCell.room;
             cell.room.Assimilate(roomToAssimilate);
             rooms.Remove(roomToAssimilate);
             Destroy(roomToAssimilate);
         }
+        cell.tileState = UnitType.Path;
     }
 
-    private void CreateWall(MazeCell cell, MazeCell otherCell, MazeDirection direction)
+    private void CreateWall(LevelCell cell, LevelCell otherCell, LevelDirection direction)
     {
-        MazeWall wall = Instantiate(MazeWallPrefab[Random.Range(0, MazeWallPrefab.Length)]) as MazeWall;
+        LevelWall wall = Instantiate(MazeWallPrefab[Random.Range(0, MazeWallPrefab.Length)]) as LevelWall;
         wall.Initialize(cell, otherCell, direction);
         if (otherCell != null)
         {
-            wall = Instantiate(MazeWallPrefab[Random.Range(0, MazeWallPrefab.Length)]) as MazeWall;
+            wall = Instantiate(MazeWallPrefab[Random.Range(0, MazeWallPrefab.Length)]) as LevelWall;
             wall.Initialize(otherCell, cell, direction.GetOpposite());
         }
     }
 
-    private MazeRoom CreateRoom(int indexToExclude)
+    private LevelRoom CreateRoom(int indexToExclude)
     {
-        MazeRoom newRoom = ScriptableObject.CreateInstance<MazeRoom>();
+        LevelRoom newRoom = ScriptableObject.CreateInstance<LevelRoom>();
         newRoom.settingsIndex = Random.Range(0, roomSettings.Length);
         if (newRoom.settingsIndex == indexToExclude)
         {
@@ -253,7 +239,7 @@ public class LevelStateManager : MonoBehaviour
         return coordinate.x >= 0 && coordinate.x < mapDimensions.x && coordinate.z >= 0 && coordinate.z < mapDimensions.z;
     }
 
-    public MazeCell GetCell(IntVector2 coordinates)
+    public LevelCell GetCell(IntVector2 coordinates)
     {
         return map[coordinates.x, coordinates.z];
     }
@@ -262,8 +248,9 @@ public class LevelStateManager : MonoBehaviour
     /// Fill Map functions
     /// </summary>
 
-    private void RandomFillMap()
+    private UnitType[,] RandomFillMap()
     {
+        UnitType[,] mapState = new UnitType[mapDimensions.x, mapDimensions.z];
         if (useRandomSeed)
         {
             seed = Time.time.ToString();
@@ -273,35 +260,36 @@ public class LevelStateManager : MonoBehaviour
         {
             for (int y = 0; y < mapDimensions.z; y++)
             {
-                MazeDirection direction = MazeDirection.North;
+                LevelDirection direction = LevelDirection.North;
                 //Map Edge Walls
                 if (x == 0 || x == mapDimensions.x - 1 || y == 0 || y == mapDimensions.z - 1)
                 {
-                    map[x, y].tileState = UnitType.Wall;
+                    mapState[x, y] = UnitType.Wall;
                     if (x == 0)
-                        direction = MazeDirection.East;
+                        direction = LevelDirection.East;
                     if (y == 0)
-                        direction = MazeDirection.South;
+                        direction = LevelDirection.South;
                     if (x == mapDimensions.x - 1)
-                        direction = MazeDirection.West;
+                        direction = LevelDirection.West;
                     if (y == mapDimensions.z - 1)
-                        direction = MazeDirection.North;
+                        direction = LevelDirection.North;
                 }
                 else
                 {
-                    map[x, y].tileState = UnitType.Floor;
+                    mapState[x, y] = UnitType.Floor;
                     // Randomise Tile to wall or floor
-                    map[x, y].tileState = (pseudoRandom.Next(0, 100) < randomFillPercent) ? UnitType.Wall : UnitType.Floor;
+                    mapState[x, y] = (pseudoRandom.Next(0, 100) < randomFillPercent) ? UnitType.Wall : UnitType.Floor;
                 }
-                if(map[x, y].tileState == UnitType.Wall)
+                if(mapState[x, y] == UnitType.Wall)
                 {
                     CreateWall(map[x, y], null, direction);
                 }
             }
         }
+        return mapState;
     }
 
-    void SmoothMap()
+    private UnitType[,] SmoothMap(UnitType[,] mapState)
     {
         for (int x = 0; x < mapDimensions.x; x++)
         {
@@ -310,12 +298,13 @@ public class LevelStateManager : MonoBehaviour
                 int neighbourMazeWalls = GetSurroundingAgentCount(new Vector2Int(x,y), UnitType.Wall);
 
                 if (neighbourMazeWalls > 4)
-                    map[x, y].tileState = UnitType.Wall;
+                    mapState[x, y] = UnitType.Wall;
                 else if (neighbourMazeWalls < 4)
-                    map[x, y].tileState = UnitType.Floor;
+                    mapState[x, y] = UnitType.Floor;
 
             }
         }
+        return mapState;
     }
 
     int GetSurroundingAgentCount(Vector2Int index, UnitType agentType)
@@ -349,14 +338,14 @@ public class LevelStateManager : MonoBehaviour
     /// Get random walk direction
     /// </summary>
     /// <returns></returns>
-    private MazeDirection RandomDirection()
+    private LevelDirection RandomDirection()
     {
         if (useRandomSeed)
         {
             seed = Time.time.ToString();
         }
         System.Random pseudoRandom = new System.Random(seed.GetHashCode());
-        return (MazeDirection)pseudoRandom.Next(0, 4);
+        return (LevelDirection)pseudoRandom.Next(0, 4);
     }
 
     /// <summary>
@@ -364,7 +353,7 @@ public class LevelStateManager : MonoBehaviour
     /// </summary>
     /// <param name="direction"></param>
     /// <returns></returns>
-    private static Vector2Int RandomDirectionIndex(MazeDirection direction)
+    private static Vector2Int RandomDirectionIndex(LevelDirection direction)
     {
         Vector2Int[] directionIndex =
         {
@@ -407,20 +396,20 @@ public class LevelStateManager : MonoBehaviour
     /// </summary>
     /// <param name="direction"></param>
     /// <returns></returns>
-    public static MazeDirection GetOpposite(MazeDirection direction)
+    public static LevelDirection GetOpposite(LevelDirection direction)
     {
         return oppositeMazeDirection[(int)direction];
     }
 
-    private static MazeDirection[] oppositeMazeDirection =
+    private static LevelDirection[] oppositeMazeDirection =
     {
-        MazeDirection.South,
-        MazeDirection.West,
-        MazeDirection.North,
-        MazeDirection.East
+        LevelDirection.South,
+        LevelDirection.West,
+        LevelDirection.North,
+        LevelDirection.East
     };
 
-    public static Quaternion GetMazeDirectionToWorldOrientation(MazeDirection direction)
+    public static Quaternion GetMazeDirectionToWorldOrientation(LevelDirection direction)
     {
         return MazeDirectionToWorldOrientation[(int)direction];
     }
@@ -436,7 +425,7 @@ public class LevelStateManager : MonoBehaviour
     /// <summary>
     /// Draw TileMap Debuger 
     /// </summary>
-    private void OnDrawGizmosSelected()
+    /*private void OnDrawGizmosSelected()
     {
         if (map != null)
         {
@@ -446,7 +435,7 @@ public class LevelStateManager : MonoBehaviour
             position *= mapCellScale;
 
             Gizmos.color = Color.yellow;
-            MazeCell currentTile = map[mapIndex.x, mapIndex.y];
+            LevelCell currentTile = map[mapIndex.x, mapIndex.y];
             if (currentTile.IsFullyInitialized)
             {
                 Gizmos.color = Color.red;
@@ -504,7 +493,7 @@ public class LevelStateManager : MonoBehaviour
             }
         }
 
-    }
+    }*/
 
 }
 
